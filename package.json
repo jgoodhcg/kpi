@@ -8,6 +8,7 @@
 		"ci": "npx shadow-cljs compile karma-test && npx karma start --single-run --reporters junit,dots"
 	},
 	"dependencies": {
+		"@supabase/ui": "^0.36.5",
 		"highlight.js": "11.5.1",
 		"react": "17.0.2",
 		"react-dom": "17.0.2"

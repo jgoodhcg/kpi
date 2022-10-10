@@ -16,3 +16,7 @@
 
 # clj-kondo cache
 /.clj-kondo/.cache
+
+# Supabase
+**/supabase/.branches
+**/supabase/.temp
