@@ -1,14 +1,42 @@
 (ns kpi.views
   (:require
+   ["@supabase/auth-ui-react" :as supa-auth-ui]
+   ["@supabase/supabase-js" :as supa]
    [re-frame.core :as re-frame]
    [re-com.core :as re-com :refer [at]]
    [kpi.styles :as styles]
    [kpi.config :as config]
    [kpi.events :as events]
    [kpi.routes :as routes]
-   [kpi.subs :as subs]))
+   [kpi.subs :as subs]
+   [applied-science.js-interop :as j]
+   [potpuri.core :as pot]))
 
+;; auth
 
+(def supabase-client
+  (supa/createClient
+   "http://localhost:54321"
+   "<OMITTED>"
+   ))
+
+(defn auth-internal [{:keys [supabase-client] :as arg1} content]
+  (let [state (supa-auth-ui/Auth.useUser)
+        user  (j/get state :user)]
+    (if (some? user)
+      content
+      [:> supa-auth-ui/Auth {:supabase-client supabase-client}]))
+  )
+
+(defn auth-wrapper [content]
+ [:> supa-auth-ui/Auth.UserContextProvider {:supabase-client supabase-client}
+   [:f> auth-internal {:supabase-client supabase-client}
+    content
+    ]
+   ]
+  )
+
+#_(supa-ui/Auth.UserContextProvider #js {:supabaseClient supabase-client})
 
 ;; home
 
@@ -27,7 +55,8 @@
    :on-click #(re-frame/dispatch [::events/navigate :about])])
 
 (defn home-panel []
-  [re-com/v-box
+  [auth-wrapper [:div "contenty content"]]
+  #_[re-com/v-box
    :src      (at)
    :gap      "1em"
    :children [[home-title]
