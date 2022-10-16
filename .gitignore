@@ -20,3 +20,5 @@
 # Supabase
 **/supabase/.branches
 **/supabase/.temp
+
+src/kpi/secrets.cljs

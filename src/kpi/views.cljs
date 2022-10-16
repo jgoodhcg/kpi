@@ -9,34 +9,26 @@
    [kpi.events :as events]
    [kpi.routes :as routes]
    [kpi.subs :as subs]
+   [kpi.secrets :as secrets]
    [applied-science.js-interop :as j]
    [potpuri.core :as pot]))
 
 ;; auth
 
 (def supabase-client
-  (supa/createClient
-   "http://localhost:54321"
-   "<OMITTED>"
-   ))
+  (supa/createClient secrets/supabase-url secrets/supabase-anon-key))
 
-(defn auth-internal [{:keys [supabase-client] :as arg1} content]
+(defn auth-internal [{:keys [supabase-client]} content]
   (let [state (supa-auth-ui/Auth.useUser)
         user  (j/get state :user)]
     (if (some? user)
-      content
-      [:> supa-auth-ui/Auth {:supabase-client supabase-client}]))
-  )
+      [content {:supabase/user user}]
+      [:> supa-auth-ui/Auth {:supabase-client supabase-client}])))
 
 (defn auth-wrapper [content]
  [:> supa-auth-ui/Auth.UserContextProvider {:supabase-client supabase-client}
    [:f> auth-internal {:supabase-client supabase-client}
-    content
-    ]
-   ]
-  )
-
-#_(supa-ui/Auth.UserContextProvider #js {:supabaseClient supabase-client})
+    content]])
 
 ;; home
 
@@ -55,12 +47,14 @@
    :on-click #(re-frame/dispatch [::events/navigate :about])])
 
 (defn home-panel []
-  [auth-wrapper [:div "contenty content"]]
-  #_[re-com/v-box
-   :src      (at)
-   :gap      "1em"
-   :children [[home-title]
-              [link-to-about-page]]])
+  [auth-wrapper
+   (fn [{:supabase/keys [user]}]
+     [re-com/v-box
+      :src      (at)
+      :gap      "1em"
+      :children [[home-title]
+                 [:div (str "User email is: " (-> user (j/get :email)))]
+                 [link-to-about-page]]])])
 
 
 (defmethod routes/panels :home-panel [] [home-panel])
