@@ -15,6 +15,7 @@
 
 ;; auth
 
+;; probably should move this to fx or something
 (def supabase-client
   (supa/createClient secrets/supabase-url secrets/supabase-anon-key))
 
